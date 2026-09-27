@@ -300,7 +300,7 @@ kode yang benar-benar di-deploy, perbaikan yang dilakukan, dan bukti pengujianny
 | Router | modul dan method bebas dipanggil; parameter wajib yang hilang di URL memicu `ArgumentCountError` (500) | `App::ROUTE` sebagai daftar putih (**default-deny**); parameter divalidasi lewat refleksi; parameter wajib yang hilang → **404 "Alamat tidak lengkap"** |
 | Kode status | token CSRF salah dikembalikan 419, yang diubah Apache 2.4 menjadi 500 | dikembalikan **403** |
 | Notifikasi | "Tandai Semua Dibaca" berupa tautan GET (bisa dipicu tanpa sengaja) | jadi form POST `?r=notifikasi/bacaSemua`; `notifikasi/edit/ID` (buka form, GET) dipisah dari `notifikasi/ubah/ID` (simpan, POST) |
-| Pengaturan | `satuan_berat` & `mata_uang` dibaca tanpa dicek keberadaannya →peringatan tiap tab selain Keuangan | perataan hanya dijalankan untuk kunci yang benar-benar terkirim |
+| Pengaturan | `satuan_berat` & `mata_uang` dibaca tanpa dicek keberadaannya sehingga muncul peringatan tiap kali tab selain Keuangan | perataan hanya dijalankan untuk kunci yang benar-benar terkirim |
 | Pengaturan | checkbox `notif_suara` selalu ditulis ulang, sehingga tab lain diam-diam mematikan suara | hanya ditulis bila tab Notifikasi yang aktif |
 | Formulir publik | tanpa batas pengiriman | `throttle()` berbasis sesi: 3 permintaan akun/jam, 20 cek status/10 menit — tanpa menambah tabel |
 | Sesi & header | cookie sesi tanpa flag aman; tanpa header keamanan | `HttpOnly` + `SameSite=Lax` + `Secure` saat HTTPS; `X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy`, `Content-Security-Policy`, `Permissions-Policy` |
