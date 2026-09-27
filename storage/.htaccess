@@ -1,0 +1,16 @@
+# ============================================================
+# Folder penyimpanan LaundryKu (log, cache, berkas unggahan
+# sementara). Tidak boleh diakses langsung lewat browser.
+#
+# Aturan di file ini berlaku untuk folder ini beserta seluruh
+# subfoldernya, jadi tidak bergantung di mana LaundryKu dipasang.
+# This rule applies to this folder and all of its subfolders, so it
+# does not depend on where LaundryKu is installed.
+# ============================================================
+<IfModule mod_authz_core.c>
+  Require all denied
+</IfModule>
+<IfModule !mod_authz_core.c>
+  Order allow,deny
+  Deny from all
+</IfModule>

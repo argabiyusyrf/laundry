@@ -1,0 +1,35 @@
+# ============================================================
+# Folder aset statis: hanya boleh menyajikan gambar, css, js, dan suara.
+# Folder ini tidak boleh menjalankan kode PHP, sehingga berkas
+# gambar yang berhasil terunggah tidak bisa dieksekusi sebagai skrip.
+# Catatan: aturan ini hanya aktif bila hosting mengizinkan override
+# .htaccess (AllowOverride All). Untuk hosting tanpa override,
+# pastikan tidak ada berkas .php/.phtml/.cgi di dalam folder ini.
+# ============================================================
+<IfModule mod_php.c>
+  php_flag engine off
+</IfModule>
+<IfModule mod_php7.c>
+  php_flag engine off
+</IfModule>
+<IfModule mod_php8.c>
+  php_flag engine off
+</IfModule>
+
+<IfModule mod_authz_core.c>
+  # Tolak berkas skrip apa pun yang berada di folder aset
+  <FilesMatch "\.(php|phtml|php3|php4|php5|php7|php8|cgi|pl|py|sh|htaccess)$">
+    Require all denied
+  </FilesMatch>
+
+  # Blokir berkas .htaccess tambahan milik penyerang
+  <FilesMatch "^\.ht">
+    Require all denied
+  </FilesMatch>
+</IfModule>
+<IfModule !mod_authz_core.c>
+  <FilesMatch "\.(php|phtml|php3|php4|php5|php7|php8|cgi|pl|py|sh)$">
+    Order allow,deny
+    Deny from all
+  </FilesMatch>
+</IfModule>

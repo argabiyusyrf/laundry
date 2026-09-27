@@ -1,0 +1,86 @@
+[2026-09-27 08:28:49] ERROR Too few arguments to function App\Controllers\TransaksiController::status(), 0 passed and exactly 1 expected — C:\Apache24\htdocs\laundry\app\controllers\TransaksiController.php:172
+[2026-09-27 08:28:49] ERROR HTTP 500 — Sistem mengalami gangguan tak terduga saat memproses permintaan. | Too few arguments to function App\Controllers\TransaksiController::status(), 0 passed and exactly 1 expected — C:\Apache24\htdocs\laundry\app\controllers\TransaksiController.php:172
+[2026-09-27 08:36:07] ERROR Internal error: Failed to retrieve the default value — C:\Apache24\htdocs\laundry\app\core\App.php:126
+[2026-09-27 08:36:07] ERROR HTTP 500 — Sistem mengalami gangguan tak terduga saat memproses permintaan. | Internal error: Failed to retrieve the default value — C:\Apache24\htdocs\laundry\app\core\App.php:126
+[2026-09-27 08:36:07] ERROR Internal error: Failed to retrieve the default value — C:\Apache24\htdocs\laundry\app\core\App.php:126
+[2026-09-27 08:36:07] ERROR HTTP 500 — Sistem mengalami gangguan tak terduga saat memproses permintaan. | Internal error: Failed to retrieve the default value — C:\Apache24\htdocs\laundry\app\core\App.php:126
+[2026-09-27 08:36:07] ERROR Internal error: Failed to retrieve the default value — C:\Apache24\htdocs\laundry\app\core\App.php:126
+[2026-09-27 08:36:07] ERROR HTTP 500 — Sistem mengalami gangguan tak terduga saat memproses permintaan. | Internal error: Failed to retrieve the default value — C:\Apache24\htdocs\laundry\app\core\App.php:126
+[2026-09-27 08:36:07] ERROR Internal error: Failed to retrieve the default value — C:\Apache24\htdocs\laundry\app\core\App.php:126
+[2026-09-27 08:36:07] ERROR HTTP 500 — Sistem mengalami gangguan tak terduga saat memproses permintaan. | Internal error: Failed to retrieve the default value — C:\Apache24\htdocs\laundry\app\core\App.php:126
+[2026-09-27 08:36:07] ERROR Internal error: Failed to retrieve the default value — C:\Apache24\htdocs\laundry\app\core\App.php:126
+[2026-09-27 08:36:07] ERROR HTTP 500 — Sistem mengalami gangguan tak terduga saat memproses permintaan. | Internal error: Failed to retrieve the default value — C:\Apache24\htdocs\laundry\app\core\App.php:126
+[2026-09-27 08:36:07] ERROR Internal error: Failed to retrieve the default value — C:\Apache24\htdocs\laundry\app\core\App.php:126
+[2026-09-27 08:36:07] ERROR HTTP 500 — Sistem mengalami gangguan tak terduga saat memproses permintaan. | Internal error: Failed to retrieve the default value — C:\Apache24\htdocs\laundry\app\core\App.php:126
+[2026-09-27 08:36:07] ERROR Internal error: Failed to retrieve the default value — C:\Apache24\htdocs\laundry\app\core\App.php:126
+[2026-09-27 08:36:07] ERROR HTTP 500 — Sistem mengalami gangguan tak terduga saat memproses permintaan. | Internal error: Failed to retrieve the default value — C:\Apache24\htdocs\laundry\app\core\App.php:126
+[2026-09-27 08:36:07] ERROR Internal error: Failed to retrieve the default value — C:\Apache24\htdocs\laundry\app\core\App.php:126
+[2026-09-27 08:36:07] ERROR HTTP 500 — Sistem mengalami gangguan tak terduga saat memproses permintaan. | Internal error: Failed to retrieve the default value — C:\Apache24\htdocs\laundry\app\core\App.php:126
+[2026-09-27 08:36:07] ERROR Internal error: Failed to retrieve the default value — C:\Apache24\htdocs\laundry\app\core\App.php:126
+[2026-09-27 08:36:07] ERROR HTTP 500 — Sistem mengalami gangguan tak terduga saat memproses permintaan. | Internal error: Failed to retrieve the default value — C:\Apache24\htdocs\laundry\app\core\App.php:126
+[2026-09-27 08:36:07] ERROR Internal error: Failed to retrieve the default value — C:\Apache24\htdocs\laundry\app\core\App.php:126
+[2026-09-27 08:36:07] ERROR HTTP 500 — Sistem mengalami gangguan tak terduga saat memproses permintaan. | Internal error: Failed to retrieve the default value — C:\Apache24\htdocs\laundry\app\core\App.php:126
+[2026-09-27 08:36:07] ERROR Internal error: Failed to retrieve the default value — C:\Apache24\htdocs\laundry\app\core\App.php:126
+[2026-09-27 08:36:07] ERROR HTTP 500 — Sistem mengalami gangguan tak terduga saat memproses permintaan. | Internal error: Failed to retrieve the default value — C:\Apache24\htdocs\laundry\app\core\App.php:126
+[2026-09-27 08:36:07] ERROR Internal error: Failed to retrieve the default value — C:\Apache24\htdocs\laundry\app\core\App.php:126
+[2026-09-27 08:36:07] ERROR HTTP 500 — Sistem mengalami gangguan tak terduga saat memproses permintaan. | Internal error: Failed to retrieve the default value — C:\Apache24\htdocs\laundry\app\core\App.php:126
+[2026-09-27 08:36:07] ERROR Internal error: Failed to retrieve the default value — C:\Apache24\htdocs\laundry\app\core\App.php:126
+[2026-09-27 08:36:07] ERROR HTTP 500 — Sistem mengalami gangguan tak terduga saat memproses permintaan. | Internal error: Failed to retrieve the default value — C:\Apache24\htdocs\laundry\app\core\App.php:126
+[2026-09-27 08:36:07] ERROR Internal error: Failed to retrieve the default value — C:\Apache24\htdocs\laundry\app\core\App.php:126
+[2026-09-27 08:36:07] ERROR HTTP 500 — Sistem mengalami gangguan tak terduga saat memproses permintaan. | Internal error: Failed to retrieve the default value — C:\Apache24\htdocs\laundry\app\core\App.php:126
+[2026-09-27 08:36:07] ERROR Internal error: Failed to retrieve the default value — C:\Apache24\htdocs\laundry\app\core\App.php:126
+[2026-09-27 08:36:07] ERROR HTTP 500 — Sistem mengalami gangguan tak terduga saat memproses permintaan. | Internal error: Failed to retrieve the default value — C:\Apache24\htdocs\laundry\app\core\App.php:126
+[2026-09-27 08:36:07] ERROR Internal error: Failed to retrieve the default value — C:\Apache24\htdocs\laundry\app\core\App.php:126
+[2026-09-27 08:36:07] ERROR HTTP 500 — Sistem mengalami gangguan tak terduga saat memproses permintaan. | Internal error: Failed to retrieve the default value — C:\Apache24\htdocs\laundry\app\core\App.php:126
+[2026-09-27 08:36:07] ERROR Internal error: Failed to retrieve the default value — C:\Apache24\htdocs\laundry\app\core\App.php:126
+[2026-09-27 08:36:07] ERROR HTTP 500 — Sistem mengalami gangguan tak terduga saat memproses permintaan. | Internal error: Failed to retrieve the default value — C:\Apache24\htdocs\laundry\app\core\App.php:126
+[2026-09-27 08:36:07] ERROR Internal error: Failed to retrieve the default value — C:\Apache24\htdocs\laundry\app\core\App.php:126
+[2026-09-27 08:36:07] ERROR HTTP 500 — Sistem mengalami gangguan tak terduga saat memproses permintaan. | Internal error: Failed to retrieve the default value — C:\Apache24\htdocs\laundry\app\core\App.php:126
+[2026-09-27 08:36:07] ERROR Internal error: Failed to retrieve the default value — C:\Apache24\htdocs\laundry\app\core\App.php:126
+[2026-09-27 08:36:07] ERROR HTTP 500 — Sistem mengalami gangguan tak terduga saat memproses permintaan. | Internal error: Failed to retrieve the default value — C:\Apache24\htdocs\laundry\app\core\App.php:126
+[2026-09-27 08:36:07] ERROR Internal error: Failed to retrieve the default value — C:\Apache24\htdocs\laundry\app\core\App.php:126
+[2026-09-27 08:36:07] ERROR HTTP 500 — Sistem mengalami gangguan tak terduga saat memproses permintaan. | Internal error: Failed to retrieve the default value — C:\Apache24\htdocs\laundry\app\core\App.php:126
+[2026-09-27 08:36:07] ERROR Internal error: Failed to retrieve the default value — C:\Apache24\htdocs\laundry\app\core\App.php:126
+[2026-09-27 08:36:07] ERROR HTTP 500 — Sistem mengalami gangguan tak terduga saat memproses permintaan. | Internal error: Failed to retrieve the default value — C:\Apache24\htdocs\laundry\app\core\App.php:126
+[2026-09-27 08:36:07] ERROR Internal error: Failed to retrieve the default value — C:\Apache24\htdocs\laundry\app\core\App.php:126
+[2026-09-27 08:36:07] ERROR HTTP 500 — Sistem mengalami gangguan tak terduga saat memproses permintaan. | Internal error: Failed to retrieve the default value — C:\Apache24\htdocs\laundry\app\core\App.php:126
+[2026-09-27 08:36:07] ERROR Internal error: Failed to retrieve the default value — C:\Apache24\htdocs\laundry\app\core\App.php:126
+[2026-09-27 08:36:07] ERROR HTTP 500 — Sistem mengalami gangguan tak terduga saat memproses permintaan. | Internal error: Failed to retrieve the default value — C:\Apache24\htdocs\laundry\app\core\App.php:126
+[2026-09-27 08:36:07] ERROR Internal error: Failed to retrieve the default value — C:\Apache24\htdocs\laundry\app\core\App.php:126
+[2026-09-27 08:36:07] ERROR HTTP 500 — Sistem mengalami gangguan tak terduga saat memproses permintaan. | Internal error: Failed to retrieve the default value — C:\Apache24\htdocs\laundry\app\core\App.php:126
+[2026-09-27 08:36:07] ERROR Internal error: Failed to retrieve the default value — C:\Apache24\htdocs\laundry\app\core\App.php:126
+[2026-09-27 08:36:07] ERROR HTTP 500 — Sistem mengalami gangguan tak terduga saat memproses permintaan. | Internal error: Failed to retrieve the default value — C:\Apache24\htdocs\laundry\app\core\App.php:126
+[2026-09-27 08:36:08] ERROR Internal error: Failed to retrieve the default value — C:\Apache24\htdocs\laundry\app\core\App.php:126
+[2026-09-27 08:36:08] ERROR HTTP 500 — Sistem mengalami gangguan tak terduga saat memproses permintaan. | Internal error: Failed to retrieve the default value — C:\Apache24\htdocs\laundry\app\core\App.php:126
+[2026-09-27 08:36:08] ERROR Internal error: Failed to retrieve the default value — C:\Apache24\htdocs\laundry\app\core\App.php:126
+[2026-09-27 08:36:08] ERROR HTTP 500 — Sistem mengalami gangguan tak terduga saat memproses permintaan. | Internal error: Failed to retrieve the default value — C:\Apache24\htdocs\laundry\app\core\App.php:126
+[2026-09-27 08:36:08] ERROR Internal error: Failed to retrieve the default value — C:\Apache24\htdocs\laundry\app\core\App.php:126
+[2026-09-27 08:36:08] ERROR HTTP 500 — Sistem mengalami gangguan tak terduga saat memproses permintaan. | Internal error: Failed to retrieve the default value — C:\Apache24\htdocs\laundry\app\core\App.php:126
+[2026-09-27 08:36:08] ERROR Internal error: Failed to retrieve the default value — C:\Apache24\htdocs\laundry\app\core\App.php:126
+[2026-09-27 08:36:08] ERROR HTTP 500 — Sistem mengalami gangguan tak terduga saat memproses permintaan. | Internal error: Failed to retrieve the default value — C:\Apache24\htdocs\laundry\app\core\App.php:126
+[2026-09-27 08:36:08] ERROR Internal error: Failed to retrieve the default value — C:\Apache24\htdocs\laundry\app\core\App.php:126
+[2026-09-27 08:36:08] ERROR HTTP 500 — Sistem mengalami gangguan tak terduga saat memproses permintaan. | Internal error: Failed to retrieve the default value — C:\Apache24\htdocs\laundry\app\core\App.php:126
+[2026-09-27 08:36:08] ERROR Internal error: Failed to retrieve the default value — C:\Apache24\htdocs\laundry\app\core\App.php:126
+[2026-09-27 08:36:08] ERROR HTTP 500 — Sistem mengalami gangguan tak terduga saat memproses permintaan. | Internal error: Failed to retrieve the default value — C:\Apache24\htdocs\laundry\app\core\App.php:126
+[2026-09-27 08:36:08] ERROR Internal error: Failed to retrieve the default value — C:\Apache24\htdocs\laundry\app\core\App.php:126
+[2026-09-27 08:36:08] ERROR HTTP 500 — Sistem mengalami gangguan tak terduga saat memproses permintaan. | Internal error: Failed to retrieve the default value — C:\Apache24\htdocs\laundry\app\core\App.php:126
+[2026-09-27 08:36:08] ERROR Internal error: Failed to retrieve the default value — C:\Apache24\htdocs\laundry\app\core\App.php:126
+[2026-09-27 08:36:08] ERROR HTTP 500 — Sistem mengalami gangguan tak terduga saat memproses permintaan. | Internal error: Failed to retrieve the default value — C:\Apache24\htdocs\laundry\app\core\App.php:126
+[2026-09-27 08:36:08] ERROR Internal error: Failed to retrieve the default value — C:\Apache24\htdocs\laundry\app\core\App.php:126
+[2026-09-27 08:36:08] ERROR HTTP 500 — Sistem mengalami gangguan tak terduga saat memproses permintaan. | Internal error: Failed to retrieve the default value — C:\Apache24\htdocs\laundry\app\core\App.php:126
+[2026-09-27 08:36:08] ERROR Internal error: Failed to retrieve the default value — C:\Apache24\htdocs\laundry\app\core\App.php:126
+[2026-09-27 08:36:08] ERROR HTTP 500 — Sistem mengalami gangguan tak terduga saat memproses permintaan. | Internal error: Failed to retrieve the default value — C:\Apache24\htdocs\laundry\app\core\App.php:126
+[2026-09-27 08:36:08] ERROR Internal error: Failed to retrieve the default value — C:\Apache24\htdocs\laundry\app\core\App.php:126
+[2026-09-27 08:36:08] ERROR HTTP 500 — Sistem mengalami gangguan tak terduga saat memproses permintaan. | Internal error: Failed to retrieve the default value — C:\Apache24\htdocs\laundry\app\core\App.php:126
+[2026-09-27 08:36:08] ERROR Internal error: Failed to retrieve the default value — C:\Apache24\htdocs\laundry\app\core\App.php:126
+[2026-09-27 08:36:08] ERROR HTTP 500 — Sistem mengalami gangguan tak terduga saat memproses permintaan. | Internal error: Failed to retrieve the default value — C:\Apache24\htdocs\laundry\app\core\App.php:126
+[2026-09-27 08:36:08] ERROR Internal error: Failed to retrieve the default value — C:\Apache24\htdocs\laundry\app\core\App.php:126
+[2026-09-27 08:36:08] ERROR HTTP 500 — Sistem mengalami gangguan tak terduga saat memproses permintaan. | Internal error: Failed to retrieve the default value — C:\Apache24\htdocs\laundry\app\core\App.php:126
+[2026-09-27 08:36:09] ERROR Internal error: Failed to retrieve the default value — C:\Apache24\htdocs\laundry\app\core\App.php:126
+[2026-09-27 08:36:09] ERROR HTTP 500 — Sistem mengalami gangguan tak terduga saat memproses permintaan. | Internal error: Failed to retrieve the default value — C:\Apache24\htdocs\laundry\app\core\App.php:126
+[2026-09-27 08:36:29] ERROR Internal error: Failed to retrieve the default value — C:\Apache24\htdocs\laundry\app\core\App.php:126
+[2026-09-27 08:36:29] ERROR HTTP 500 — Sistem mengalami gangguan tak terduga saat memproses permintaan. | Internal error: Failed to retrieve the default value — C:\Apache24\htdocs\laundry\app\core\App.php:126
+[2026-09-27 08:37:53] ERROR Call to undefined method App\Controllers\NotifikasiController::olehKelola() — C:\Apache24\htdocs\laundry\app\controllers\NotifikasiController.php:79
+[2026-09-27 08:37:53] ERROR HTTP 500 — Sistem mengalami gangguan tak terduga saat memproses permintaan. | Call to undefined method App\Controllers\NotifikasiController::olehKelola() — C:\Apache24\htdocs\laundry\app\controllers\NotifikasiController.php:79
+[2026-09-27 08:38:06] ERROR Call to undefined method App\Controllers\NotifikasiController::olehKelola() — C:\Apache24\htdocs\laundry\app\controllers\NotifikasiController.php:79
+[2026-09-27 08:38:06] ERROR HTTP 500 — Sistem mengalami gangguan tak terduga saat memproses permintaan. | Call to undefined method App\Controllers\NotifikasiController::olehKelola() — C:\Apache24\htdocs\laundry\app\controllers\NotifikasiController.php:79

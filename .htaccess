@@ -1,0 +1,49 @@
+# ============================================================
+# LaundryKu — Opsional: URL cantik (pretty URL) bila server
+# mengaktifkan mod_rewrite (default Apache mesin ini: nonaktif,
+# jadi routing memakai index.php?r=... yang pasti bekerja).
+# ============================================================
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteRule ^ index.php [QSA,L]
+</IfModule>
+
+# ============================================================
+# Halaman error (error boundary) untuk hosting.
+# Catatan: Jalur di bawah relatif ke DOCUMENT ROOT. Bila LaundryKu
+# dipasang di subfolder (mis. /laundry/), ubah menjadi
+#   ErrorDocument 404 /laundry/index.php?r=error/kode/404
+# ============================================================
+<IfModule mod_authz_core.c>
+  ErrorDocument 400 /index.php?r=error/kode/400
+  ErrorDocument 403 /index.php?r=error/kode/403
+  ErrorDocument 404 /index.php?r=error/kode/404
+  ErrorDocument 405 /index.php?r=error/kode/405
+  ErrorDocument 500 /index.php?r=error/kode/500
+  ErrorDocument 502 /index.php?r=error/kode/502
+  ErrorDocument 503 /index.php?r=error/kode/503
+</IfModule>
+
+# ============================================================
+# Blokir file sensitif yang tidak boleh bisa diunduh lewat browser.
+# Berlaku hanya bila hosting mengizinkan override .htaccess
+# (AllowOverride All). Bila tidak aktif, pemangkasan file sensitif
+# saat upload (lihat README bagian Deploy) tetap wajib dilakukan:
+#   - jangan upload: *.zip, *.sql, *.docx, *.md, install.php, inspeksi.php
+# ============================================================
+<IfModule mod_authz_core.c>
+  # Arsip, dump database, dokumen internal
+  <FilesMatch "\.(zip|sql|docx|doc|xlsx|pdf|md|log|bak|ini|yml|yaml)$">
+    Require all denied
+  </FilesMatch>
+
+  # Berkas konfigurasi & alat bantu
+  <FilesMatch "^(config\.php|install\.php|inspeksi\.php|database\.sql|laundry\.zip|doc\.docx)$">
+    Require all denied
+  </FilesMatch>
+
+  # Folder log
+  RedirectMatch 404 ^/storage/
+</IfModule>

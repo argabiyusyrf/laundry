@@ -1,0 +1,12 @@
+[2026-09-25 09:45:45] ERROR App\Controllers\AkunController::ubah(): Argument #1 ($id) must be of type int, string given — C:\Apache24\htdocs\laundry\app\controllers\AkunController.php:89
+[2026-09-25 09:45:45] ERROR HTTP 500 — Sistem mengalami gangguan tak terduga saat memproses permintaan. | App\Controllers\AkunController::ubah(): Argument #1 ($id) must be of type int, string given — C:\Apache24\htdocs\laundry\app\controllers\AkunController.php:89
+[2026-09-25 09:45:45] ERROR App\Controllers\AkunController::ubah(): Argument #1 ($id) must be of type int, string given — C:\Apache24\htdocs\laundry\app\controllers\AkunController.php:89
+[2026-09-25 09:45:45] ERROR HTTP 500 — Sistem mengalami gangguan tak terduga saat memproses permintaan. | App\Controllers\AkunController::ubah(): Argument #1 ($id) must be of type int, string given — C:\Apache24\htdocs\laundry\app\controllers\AkunController.php:89
+[2026-09-25 09:45:46] ERROR App\Controllers\AkunController::hapus(): Argument #1 ($id) must be of type int, string given — C:\Apache24\htdocs\laundry\app\controllers\AkunController.php:169
+[2026-09-25 09:45:46] ERROR HTTP 500 — Sistem mengalami gangguan tak terduga saat memproses permintaan. | App\Controllers\AkunController::hapus(): Argument #1 ($id) must be of type int, string given — C:\Apache24\htdocs\laundry\app\controllers\AkunController.php:169
+[2026-09-25 12:12:19] ERROR SQLSTATE[HY093]: Invalid parameter number — C:\Apache24\htdocs\laundry\app\models\PermintaanAkun.php:94
+[2026-09-25 12:12:19] ERROR HTTP 500 — Sistem mengalami gangguan tak terduga saat memproses permintaan. | SQLSTATE[HY093]: Invalid parameter number — C:\Apache24\htdocs\laundry\app\models\PermintaanAkun.php:94
+[2026-09-25 12:12:20] ERROR SQLSTATE[HY093]: Invalid parameter number — C:\Apache24\htdocs\laundry\app\models\PermintaanAkun.php:94
+[2026-09-25 12:12:20] ERROR HTTP 500 — Sistem mengalami gangguan tak terduga saat memproses permintaan. | SQLSTATE[HY093]: Invalid parameter number — C:\Apache24\htdocs\laundry\app\models\PermintaanAkun.php:94
+[2026-09-25 12:13:09] ERROR SQLSTATE[HY093]: Invalid parameter number — C:\Apache24\htdocs\laundry\app\models\PermintaanAkun.php:94
+[2026-09-25 12:13:09] ERROR HTTP 500 — Sistem mengalami gangguan tak terduga saat memproses permintaan. | SQLSTATE[HY093]: Invalid parameter number — C:\Apache24\htdocs\laundry\app\models\PermintaanAkun.php:94

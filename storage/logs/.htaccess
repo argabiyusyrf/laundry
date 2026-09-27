@@ -1,0 +1,10 @@
+# Folder penyimpanan log LaundryKu — TIDAK BOLEH diakses lewat browser.
+# File log hanya dibaca lewat File Manager hosting atau inspeksi.php.
+
+<IfModule mod_authz_core.c>
+  Require all denied
+</IfModule>
+<IfModule !mod_authz_core.c>
+  Order allow,deny
+  Deny from all
+</IfModule>
