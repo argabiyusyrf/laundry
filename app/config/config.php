@@ -76,7 +76,7 @@ define('APP_NAME', 'LaundryKu');
  *     install.php?token=NILAI_YANG_ANDA_TULIS
  * Setelah instalasi selesai, HAPUS install.php dari server.
  */
-define('INSTALL_TOKEN', 'ganti-dengan-token-acak-anda-sebelum-upload');
+define('INSTALL_TOKEN', 'gsgsq8zrikpkxuh686rjrcyll3kv2eiyc0a0s4yxwvjzrw904jye8z78e6pyak3a');
 
 /* ===== Mode debug =====
  * Otomatis: server dijalankan di komputer sendiri (alamat loopback) → true,

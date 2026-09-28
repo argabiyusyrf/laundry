@@ -84,3 +84,7 @@
 [2026-09-27 08:37:53] ERROR HTTP 500 — Sistem mengalami gangguan tak terduga saat memproses permintaan. | Call to undefined method App\Controllers\NotifikasiController::olehKelola() — C:\Apache24\htdocs\laundry\app\controllers\NotifikasiController.php:79
 [2026-09-27 08:38:06] ERROR Call to undefined method App\Controllers\NotifikasiController::olehKelola() — C:\Apache24\htdocs\laundry\app\controllers\NotifikasiController.php:79
 [2026-09-27 08:38:06] ERROR HTTP 500 — Sistem mengalami gangguan tak terduga saat memproses permintaan. | Call to undefined method App\Controllers\NotifikasiController::olehKelola() — C:\Apache24\htdocs\laundry\app\controllers\NotifikasiController.php:79
+[2026-09-27 14:15:06] ERROR Call to undefined function menuSidebar() — C:\Apache24\htdocs\laundry\app\views\partials\header.php:53
+[2026-09-27 14:15:06] ERROR HTTP 500 — Sistem mengalami gangguan tak terduga saat memproses permintaan. | Call to undefined function menuSidebar() — C:\Apache24\htdocs\laundry\app\views\partials\header.php:53
+[2026-09-27 14:15:06] ERROR Call to undefined function menuSidebar() — C:\Apache24\htdocs\laundry\app\views\partials\header.php:53
+[2026-09-27 14:15:06] ERROR HTTP 500 — Sistem mengalami gangguan tak terduga saat memproses permintaan. | Call to undefined function menuSidebar() — C:\Apache24\htdocs\laundry\app\views\partials\header.php:53

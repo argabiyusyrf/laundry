@@ -45,65 +45,27 @@ window.LK_NOTIF_VOLUME = <?= (int)pengaturan('notif_volume', '80') ?>;
     </div>
 
     <nav class="sidebar-nav">
-      <span class="nav-section">Menu</span>
-      <a href="<?= url('dashboard') ?>"<?= ($active ?? '') === 'dashboard' ? ' class="active"' : '' ?>>
-        <span class="nav-ico"><?= icon('dashboard', 17) ?></span><span class="nav-text">Dashboard</span>
-      </a>
-      <a href="<?= url('transaksi') ?>"<?= ($active ?? '') === 'transaksi' ? ' class="active"' : '' ?>>
-        <span class="nav-ico"><?= icon('transaksi', 17) ?></span><span class="nav-text">Transaksi</span>
-        <?php if (menuBadge('transaksi_siap') > 0): ?><span class="nav-badge"><?= badgeNilai(menuBadge('transaksi_siap')) ?></span><?php endif; ?>
-      </a>
-      <a href="<?= url('transaksi/baru') ?>"<?= ($active ?? '') === 'transaksi_baru' ? ' class="active"' : '' ?>>
-        <span class="nav-ico"><?= icon('plus', 17) ?></span><span class="nav-text">Transaksi Baru</span>
-      </a>
-      <a href="<?= url('notifikasi') ?>"<?= ($active ?? '') === 'notifikasi' ? ' class="active"' : '' ?>>
-        <span class="nav-ico"><?= icon('lonceng', 17) ?></span><span class="nav-text">Notifikasi</span>
-        <?php if ($notif['belum'] > 0): ?><span class="nav-badge"><?= badgeNilai($notif['belum']) ?></span><?php endif; ?>
-      </a>
-      <?php if (cekHak('notifikasi_kirim')): ?>
-      <a href="<?= url('notifikasi/kirim') ?>"<?= ($active ?? '') === 'notifikasi_kirim' ? ' class="active"' : '' ?>>
-        <span class="nav-ico"><?= icon('kirim', 17) ?></span><span class="nav-text">Kirim Notifikasi</span>
-      </a>
-      <?php endif; ?>
-
-      <span class="nav-section">Sistem</span>
-      <?php if (cekHak('pelanggan')): ?>
-      <a href="<?= url('pelanggan') ?>"<?= ($active ?? '') === 'pelanggan' ? ' class="active"' : '' ?>>
-        <span class="nav-ico"><?= icon('pelanggan', 17) ?></span><span class="nav-text">Pelanggan</span>
-      </a>
-      <?php endif; ?>
-      <a href="<?= url('paket') ?>"<?= ($active ?? '') === 'paket' ? ' class="active"' : '' ?>>
-        <span class="nav-ico"><?= icon('paket', 17) ?></span><span class="nav-text">Paket Layanan</span>
-      </a>
-      <?php if (cekHak('laporan')): ?>
-      <a href="<?= url('laporan') ?>"<?= ($active ?? '') === 'laporan' ? ' class="active"' : '' ?>>
-        <span class="nav-ico"><?= icon('laporan', 17) ?></span><span class="nav-text">Laporan</span>
-      </a>
-      <?php endif; ?>
-      <?php if (cekHak('karyawan')): ?>
-      <a href="<?= url('karyawan') ?>"<?= ($active ?? '') === 'karyawan' ? ' class="active"' : '' ?>>
-        <span class="nav-ico"><?= icon('karyawan', 17) ?></span><span class="nav-text">Karyawan</span>
-      </a>
-      <?php endif; ?>
-      <?php if (cekHak('akun')): ?>
-      <a href="<?= url('akun') ?>"<?= ($active ?? '') === 'akun' ? ' class="active"' : '' ?>>
-        <span class="nav-ico"><?= icon('pengguna', 17) ?></span><span class="nav-text">Akun &amp; Pengguna</span>
-      </a>
-      <a href="<?= url('akun/permintaan') ?>"<?= ($active ?? '') === 'permintaan_admin' ? ' class="active"' : '' ?>>
-        <span class="nav-ico"><?= icon('toko', 17) ?></span><span class="nav-text">Permintaan Toko</span>
-        <?php if (menuBadge('permintaan') > 0): ?><span class="nav-badge"><?= badgeNilai(menuBadge('permintaan')) ?></span><?php endif; ?>
-      </a>
-      <?php endif; ?>
-      <?php if (cekHak('aktivitas')): ?>
-      <a href="<?= url('aktivitas') ?>"<?= ($active ?? '') === 'aktivitas' ? ' class="active"' : '' ?>>
-        <span class="nav-ico"><?= icon('riwayat', 17) ?></span><span class="nav-text">Log Aktivitas</span>
-      </a>
-      <?php endif; ?>
-      <?php if (cekHak('pengaturan')): ?>
-      <a href="<?= url('pengaturan') ?>"<?= ($active ?? '') === 'pengaturan' ? ' class="active"' : '' ?>>
-        <span class="nav-ico"><?= icon('pengaturan', 17) ?></span><span class="nav-text">Pengaturan</span>
-      </a>
-      <?php endif; ?>
+      <?php
+      /* Susunan menu didefinisikan di helpers.php -> menuSidebar(), bukan
+         ditulis satu per satu di sini, supaya pengelompokan section cukup
+         diubah dari satu tempat. Fungsi itu juga sudah menyaring menu
+         menurut hak akses dan membuang section yang isinya habis. */
+      $menuSidebar = menuSidebar((int)($notif['belum'] ?? 0));
+      ?>
+      <?php foreach ($menuSidebar as $grup): ?>
+        <span class="nav-section"><?= e($grup['judul']) ?></span>
+        <?php foreach ($grup['bagian'] as $bagian): ?>
+          <?php if ($bagian['judul'] !== ''): ?>
+            <span class="nav-subsection"><?= e($bagian['judul']) ?></span>
+          <?php endif; ?>
+          <?php foreach ($bagian['item'] as $item): ?>
+            <a href="<?= url($item['rute']) ?>"<?= ($active ?? '') === ($item['aktif'] ?? $item['rute']) ? ' class="active"' : '' ?>>
+              <span class="nav-ico"><?= icon($item['ikon'], 17) ?></span><span class="nav-text"><?= e($item['label']) ?></span>
+              <?php if (!empty($item['jumlah'])): ?><span class="nav-badge"><?= badgeNilai((int)$item['jumlah']) ?></span><?php endif; ?>
+            </a>
+          <?php endforeach; ?>
+        <?php endforeach; ?>
+      <?php endforeach; ?>
     </nav>
 
     <div class="sidebar-foot">

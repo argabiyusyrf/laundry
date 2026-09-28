@@ -120,10 +120,26 @@ function csrfSuntik(string $html): string
     );
 }
 
-/** URL asset statis (css/js). */
+/**
+ * URL asset statis (css/js).
+ *
+ * Server hosting mengirim "Cache-Control: max-age=2592000" (30 hari) untuk
+ * berkas statis. Tanpa penanda versi, peramban akan menahan berkas lama
+ * selama 30 hari sehingga perbaikan css/js baru tidak pernah terlihat.
+ * Karena itu setiap URL diberi ?v=<waktu modifikasi berkas>. Begitu
+ * berkasnya berubah, URL-nya ikut berubah, dan peramban otomatis
+ * mengambil yang baru tanpa perlu hard refresh.
+ */
 function asset_url(string $file): string
 {
-    return BASE_REL . '/asset/' . $file;
+    static $stamp = [];
+
+    if (!array_key_exists($file, $stamp)) {
+        $waktu = @filemtime(__DIR__ . '/../../asset/' . $file);
+        $stamp[$file] = ($waktu === false) ? '1' : (string) $waktu;
+    }
+
+    return BASE_REL . '/asset/' . $file . '?v=' . $stamp[$file];
 }
 
 /**
@@ -615,6 +631,119 @@ function cekHak(string $menu): bool
     }
     $izin = HAK_AKSES[$menu] ?? [];
     return in_array($role, $izin, true);
+}
+
+/**
+ * Susunan menu sidebar, sudah disaring sesuai hak akses pengguna.
+ *
+ * Definisi menu dipisah dari tampilan (header.php) supaya pengelompokan
+ * cukup diubah di satu tempat. Bentuk datanya:
+ *
+ *   [
+ *     ['judul' => 'Nama Section', 'item' => [ ... ]],
+ *     ['judul' => 'Nama Section', 'sub' => [
+ *         ['judul' => 'SubBagian', 'item' => [ ... ]],
+ *         ['judul' => 'SubBagian', 'item' => [ ... ]],
+ *     ]],
+ *   ]
+ *
+ * Jadi sebuah section boleh punya daftar 'item' langsung, boleh punya
+ * 'sub' berisi beberapa subbagian, dan boleh digabung keduanya. Section
+ * tanpa 'sub' diperlakukan sebagai satu subbagian tanpa judul.
+ *
+ * Kunci tiap item:
+ *   rute     - nama route untuk url()                (wajib)
+ *   label    - teks menu                            (wajib)
+ *   ikon     - nama ikon di icon()                 (wajib)
+ *   aktif    - nilai $active yang menandai menu ini; defaultnya 'rute'
+ *   hak      - kunci izin di HAK_AKSES; bila diisi dan role tidak punya
+ *              izin, item disembunyikan
+ *   jumlah   - angka badge yang sudah diketahui pemanggil
+ *   badge    - kunci menuBadge() untuk menghitung badge sendiri
+ *
+ * Parameter $notifBelum dipakai untuk badge menu Notifikasi, karena
+ * jumlahnya sudah dihitung sekali di header.php lewat notifRingkas().
+ */
+function menuSidebar(int $notifBelum = 0): array
+{
+    $definisi = [
+        [
+            'judul' => 'Menu Utama',
+            'item'  => [
+                ['rute' => 'dashboard', 'label' => 'Dashboard', 'ikon' => 'dashboard'],
+                ['rute' => 'transaksi', 'label' => 'Transaksi', 'ikon' => 'transaksi', 'badge' => 'transaksi_siap'],
+                ['rute' => 'transaksi/baru', 'label' => 'Transaksi Baru', 'ikon' => 'plus', 'aktif' => 'transaksi_baru'],
+                ['rute' => 'notifikasi', 'label' => 'Notifikasi', 'ikon' => 'lonceng', 'jumlah' => $notifBelum],
+                ['rute' => 'notifikasi/kirim', 'label' => 'Kirim Notifikasi', 'ikon' => 'kirim', 'aktif' => 'notifikasi_kirim', 'hak' => 'notifikasi_kirim'],
+            ],
+        ],
+        [
+            'judul' => 'Data Master',
+            'item'  => [
+                ['rute' => 'pelanggan', 'label' => 'Pelanggan', 'ikon' => 'pelanggan', 'hak' => 'pelanggan'],
+                ['rute' => 'paket', 'label' => 'Paket Layanan', 'ikon' => 'paket'],
+                ['rute' => 'karyawan', 'label' => 'Karyawan', 'ikon' => 'karyawan', 'hak' => 'karyawan'],
+            ],
+        ],
+        [
+            'judul' => 'Laporan & Riwayat',
+            'item'  => [
+                ['rute' => 'laporan', 'label' => 'Laporan', 'ikon' => 'laporan', 'hak' => 'laporan'],
+                ['rute' => 'aktivitas', 'label' => 'Log Aktivitas', 'ikon' => 'riwayat', 'hak' => 'aktivitas'],
+            ],
+        ],
+        [
+            'judul' => 'Sistem',
+            'item'  => [
+                ['rute' => 'akun', 'label' => 'Akun & Pengguna', 'ikon' => 'pengguna', 'hak' => 'akun'],
+                ['rute' => 'akun/permintaan', 'label' => 'Permintaan Toko', 'ikon' => 'toko', 'aktif' => 'permintaan_admin', 'hak' => 'akun', 'badge' => 'permintaan'],
+                ['rute' => 'pengaturan', 'label' => 'Pengaturan', 'ikon' => 'pengaturan', 'hak' => 'pengaturan'],
+            ],
+        ],
+    ];
+
+    $siap = [];
+    foreach ($definisi as $grup) {
+        // Section tanpa 'sub' diperlakukan sebagai satu subbagian tanpa judul.
+        $bagian = !empty($grup['sub'])
+            ? $grup['sub']
+            : [['judul' => '', 'item' => $grup['item'] ?? []]];
+
+        $bagianSiap = [];
+        foreach ($bagian as $sub) {
+            $itemSiap = [];
+            foreach (($sub['item'] ?? []) as $item) {
+                if (isset($item['hak']) && !cekHak((string)$item['hak'])) {
+                    continue;
+                }
+                $jumlah = (int)($item['jumlah'] ?? 0);
+                if ($jumlah <= 0 && isset($item['badge'])) {
+                    $jumlah = menuBadge((string)$item['badge']);
+                }
+                if ($jumlah > 0) {
+                    $item['jumlah'] = $jumlah;
+                }
+                $itemSiap[] = $item;
+            }
+            // Subbagian tanpa sisa item tidak perlu ditampilkan.
+            if ($itemSiap) {
+                $bagianSiap[] = [
+                    'judul' => (string)($sub['judul'] ?? ''),
+                    'item'  => $itemSiap,
+                ];
+            }
+        }
+        // Section yang isinya habis setelah disaring juga dibuang, supaya
+        // tidak ada judul section menggantung tanpa menu di bawahnya.
+        if ($bagianSiap) {
+            $siap[] = [
+                'judul'  => (string)($grup['judul'] ?? ''),
+                'bagian' => $bagianSiap,
+            ];
+        }
+    }
+
+    return $siap;
 }
 
 /**

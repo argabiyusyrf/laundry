@@ -32,7 +32,12 @@ dengan arsitektur **MVC custom** — tanpa framework, tanpa Composer, tanpa CDN.
 - **Ganti Password** — dari menu Profil, tanpa perlu phpMyAdmin (mengikuti kebijakan min. panjang dari Pengaturan)
 - **Halaman error (error boundary)** — 404, 403, 405, 500, dst. tampil cantik & konsisten, detail teknis hanya di mode pengembangan
 - **File log otomatis** — semua error tersimpan ke `storage/logs/laundryku-YYYY-MM-DD.log` (dilindungi dari akses web); halaman `inspeksi.php` untuk diagnosis cepat (dilindungi token, hapus setelah dipakai)
-- **Design system responsif** — ikon SVG inline (tanpa emoji/CDN), sidebar lipat di desktop, menu off-canvas di HP, tabel scrollable, tata letak berkedalaman (hero, gradien, mikro-interaksi), siap rebrand per klien
+- **Design system responsif** - ikon SVG inline (tanpa emoji/CDN), sidebar lipat di desktop, menu off-canvas di HP, tabel scrollable, tata letak berkedalaman (hero, gradien, mikro-interaksi), siap rebrand per klien
+- **Panel samping geser** - form tambah dan ubah karyawan, paket, dan pelanggan terbuka dari sisi kanan tanpa pindah halaman, dengan lapisan latar yang bisa ditutup
+- **Sidebar berbasis data** - seluruh tautan sidebar berasal dari satu fungsi `menuSidebar()` di `app/helpers/helpers.php`, otomatis menyesuaikan izin tiap peran dan membuang section yang kosong
+- **Halaman Profil** - kartu identitas (avatar, peran, status), tombol lihat dan sembunyikan password, serta penilaian kekuatan password di peramban dengan angka minimum yang diambil dari server
+- **Penanda versi aset** - `asset_url()` menempelkan `?v=<waktu modifikasi>` pada URL aset, sehingga perubahan CSS tidak tertahan cache 30 hari milik hosting
+- **Tata letak lima tab yang kokoh** - tiap panel memakai `display:none` langsung, dan struktur HTML tiap tab sudah diverifikasi di server sampai ke urutan tag penutupnya
 
 ## Arsitektur (MVC custom)
 
@@ -55,6 +60,8 @@ laundry/
     ├── controllers/        → Auth, Dashboard, Pelanggan, Paket, Transaksi, Laporan, Notifikasi, Pengaturan, Profil, Akun, Permintaan, Karyawan, Aktivitas, Error
     ├── models/             → User, Pelanggan, Paket, Transaksi, Notifikasi, Pengaturan, PermintaanAkun, Aktivitas
     └── views/              → HTML tampilan (partials + per halaman)
+├── README.md                      → panduan teknis ini
+├── doc.docx                       → dokumentasi produk lengkap (hanya di dalam laundry.zip)
 ```
 
 ### Alur request
@@ -205,14 +212,49 @@ Berkas yang **tidak** ikut di-upload setelah instalasi selesai:
 | `inspeksi.php` | memamerkan versi PHP, modul, dan status koneksi database |
 | `doc.docx` | dokumen panduan, hanya tersedia di dalam `laundry.zip` |
 | `laundry.zip` | artefak distribusi, bukan bagian aplikasi |
+| `storage/logs/*.log` | log milik mesin lokal, bukan log server |
 
-`database.sql`, `README.md`, dan `RENCANA-MULTIUSER.md` juga sebaiknya tidak
-dibiarkan di docroot karena bisa diunduh publik. Semuanya tetap tersedia
-di dalam `laundry.zip`.
+`database.sql` dan `README.md` juga sebaiknya tidak dibiarkan di docroot
+karena bisa diunduh publik. Semuanya tetap tersedia di dalam `laundry.zip`.
+
+Folder `storage/logs/` sendiri **harus ada** di server, karena aplikasi menuliskannya
+sendiri. Yang tidak ikut diunggah hanya berkas `.log` di dalamnya: log yang
+terhasil dari mesin lokal memuat jalur folder lokal (misalnya
+`C:\Apache24\htdocs\laundry\app\...`) dan pesan galat versi lama, sehingga
+menyingkirkan database lokal ke pelanggan. Setelah diunggah, pastikan hanya
+`.htaccess` dan log yang benar-benar ditulis server yang tersisa di sana.
 
 Berkas lain yang juga diblokir `.htaccess` bila pernah ada di server:
 `*.sql`, `*.md`, `*.docx`, `*.zip`, `*.ps1`, `*.psb`, `*.sh`, `*.bak`,
 `*.log`, `*.ini`, `*.env`, dan berkas berawalan `.` (dotfile).
+
+### Verifikasi unggahan dengan SHA-256
+
+Ukuran berkas saja tidak cukup untuk menyatakan unggahan berhasil. Dua berkas
+berbeda bisa memiliki ukuran yang sama persis, dan transfer FTP yang terputus
+di tengah bisa meninggalkan berkas setengah jadi. Yang membuktikan unggahan
+berhasil hanyalah sidik jari SHA-256 yang sama.
+
+Hitung hash berkas lokal:
+
+```powershell
+Get-FileHash C:\Apache24\htdocs\laundry\asset\style.css -Algorithm SHA256
+```
+
+Lalu bandingkan dengan hash berkas di server, dihitung dari skrip sementara
+dengan fungsi bawaan PHP:
+
+```php
+echo hash_file("sha256", $berkas);
+```
+
+Hash sama berarti isi berkasnya identik. Hash berbeda berarti unggahan gagal
+dan harus diulang. Kode status 226 pada respons FTP juga bukan bukti, dan
+ukuran yang sama juga bukan bukti.
+
+> Skrip penghitung hash harus dihapus dari server segera setelah selesai dipakai.
+> Jangan pernah ditinggalkan di dalam docroot, karena siapa pun yang mengetahui
+> alamatnya bisa memakainya untuk membaca isi berkas lain.
 
 ### Dua hal yang perlu dipastikan di sisi server
 
@@ -265,9 +307,15 @@ manager yang menyetujui, root tidak ikut campur.
 
 ### 3. Pengaturan — 5 tab
 
-Halaman Pengaturan memakai satu form dengan lima tab; tab aktif menentukan
+Halaman Pengaturan memakai satu form dengan lima tab. Tab aktif menentukan
 field mana yang ikut terkirim, dan tab kembali dibuka setelah penyimpanan
 berhasil.
+
+Masing-masing tab adalah URL terpisah (`?tab=struk` dan seterusnya), dan view
+hanya merender panel tab yang sedang aktif. Empat panel lainnya tidak
+dihasilkan sama sekali, sehingga tidak ada kolom tersembunyi yang ikut
+terkirim maupun yang menggagalkan validasi peramban. Aturan ini diperbaiki
+pada v3.5; penjelasan lengkapnya ada di bagian Catatan Perbaikan v3.5.
 
 | Tab | Isi | Kunci pengaturan |
 |---|---|---|
@@ -471,4 +519,202 @@ define('DB_PORT', '3306');
 - Jelaskan alur kerja 3 role (root/manager/staff) — cocok untuk toko dengan beberapa karyawan counter
 - Ubah warna brand cukup lewat token CSS di `asset/style.css`
 - Tawarkan tambahan (rilis berikutnya): laporan per kasir, grafik pendapatan, aplikasi customer cek status cucian, multi-cabang
-- Karena MVC, menambah fitur = tambah method di Controller + method di Model + halaman View — tanpa menyentuh logika lain
+
+## Cache Aset: Mengapa URL Aset Bercache
+
+Semua `style.css` dan `app.js` dirujuk lewat fungsi `asset_url()` di
+`app/helpers/helpers.php`, bukan ditulis langsung di HTML. Fungsi itu
+menempelkan waktu modifikasi berkas sebagai penanda versi pada URL:
+
+```php
+function asset_url(string $file): string
+{
+    static $stamp = [];
+
+    if (!array_key_exists($file, $stamp)) {
+        $waktu = @filemtime(__DIR__ . '/../../asset/' . $file);
+        $stamp[$file] = ($waktu === false) ? '1' : (string) $waktu;
+    }
+
+    return BASE_REL . '/asset/' . $file . '?v=' . $stamp[$file];
+}
+```
+
+Hasilnya di halaman menjadi `asset/style.css?v=1790499109`. Angka itu adalah
+`filemtime` berkas tersebut, jadi berubah sendiri begitu berkasnya diganti.
+
+Alasannya ada di respons header hosting:
+
+```
+Cache-Control: max-age=2592000, public, proxy-revalidate, must-revalidate
+```
+
+Tiga puluh hari. Tanpa penanda versi, peramban menahan `style.css` lama selama
+30 hari, sehingga perbaikan CSS baru tidak pernah terlihat walaupun berkasnya
+sudah benar-benar berubah di server. Gejalanya khas: perubahan kode PHP
+langsung terlihat, tetapi perubahan tampilan sama sekali tidak bergerak.
+
+Nilai cadangan `1` dipakai bila `filemtime` gagal dibaca, supaya URL tidak
+pernah berubah menjadi `?v=` kosong yang membuat peramban salah menebak.
+
+> Setelah mekanisme ini aktif, tidak perlu lagi menekan Ctrl+F5 untuk melihat
+> perubahan CSS. Pengecekan cukup dengan F5. Ctrl+F5 tetap berguna hanya ketika
+> sedang menelusuri masalah cache secara sengaja.
+
+## Riwayat Versi
+
+| Versi | Isi |
+|---|---|
+| v2.0 | Multi-user tiga peran, matriks izin per menu dan aksi, halaman akun, log aktivitas, halaman 403, menu dinamis, migrasi database |
+| v2.1 | Permintaan akun toko dengan setujui dan tolak oleh root, kelola karyawan oleh manager, pengaturan lima tab, pajak, diskon, DP, keamanan login |
+| v2.2 | Perlindungan CSRF menyeluruh, router default-deny, batas formulir publik, lima header keamanan, token penjaga untuk installer dan halaman diagnosis |
+| v3.3 | Panel samping geser untuk tambah dan ubah karyawan, paket, dan pelanggan; navigasi sidebar berbasis fungsi `menuSidebar()` dengan empat section; halaman profil dengan kartu identitas, tombol lihat password, dan penilaian kekuatan password; pratinjau dan pesan galat unggah logo |
+| v3.4 | Perbaikan tata letak halaman Pengaturan, penanda versi aset, verifikasi unggahan memakai SHA-256 |
+| v3.5 | Halaman Pengaturan hanya merender panel tab yang sedang aktif, sehingga penyimpanan benar-benar per tab dan kolom wajib tak lagi terkunci di panel tersembunyi |
+
+### Catatan Perbaikan v3.4
+
+Gejala yang dilaporkan: halaman Pengaturan tidak terbaca pada tab selain Umum.
+Panel Struk, Keuangan, Keamanan, dan Notifikasi tampil meluber ke bawah footer,
+sementara tab Umum tampak benar.
+
+Penyebabnya bukan aturan CSS dan bukan cache peramban. Berkas
+`app/views/pengaturan/index.php` memuat **32 tag penutup berlebih** pada baris
+150 sampai 181. Tag-tag itu menutup `</form>`, wrapper `.content`, elemen
+`</main>`, dan wrapper `.layout` tepat setelah panel Logo Toko. Akibatnya
+seluruh panel sesudahnya beserta blok tombol aksi ditulis **di luar layout**.
+
+Petunjuk yang mengarah ke sana: tab Umum aman karena panelnya terletak
+sebelum 32 baris tersebut, dan tab lain rusak karena semuanya sesudahnya. Pola
+"sebelum titik ini baik, sesudah titik ini rusak" menandakan tag penutup
+berlebih, bukan aturan gaya.
+
+Yang diperbaiki:
+
+- 32 tag berlebih dihapus. Berkas turun dari 449 menjadi 413 baris.
+- Delapan pembuka panel memakai `display:none` langsung sebagai gaya sebaris, supaya panel benar-benar runtuh walau CSS belum termuat.
+- Pembungkus `tabs-bar` beserta aturan CSS-nya dibuang dari view dan dari `asset/style.css`, karena pita putih di bawah header tidak pernah diminta.
+- Penanda versi aset dipasang lewat `asset_url()` seperti dijelaskan di bagian Cache Aset di atas.
+
+Hasil verifikasi di hosting setelah unggah:
+
+| Pemeriksaan | Hasil |
+|---|---|
+| Struktur HTML live di kelima tab | urutan `tabs`, `form`, `aksi`, tutup `form`, tutup `main`, `app.js` benar di semua tab; panel di luar `</main>`: 0 |
+| Sisa rujukan `tabs-bar` di view dan CSS | 0 |
+| SHA-256 berkas lokal terhadap server | 2 cocok, 0 berbeda |
+| `php -l` seluruh berkas PHP | 58 bersih, 0 gagal |
+| `uji-lokal.php` | lulus 220, gagal 0 |
+| `cek-drawer.php` dan `cek-menu.php` | lulus 54 dan lulus 36, gagal 0 |
+| `cek-rute.ps1` | 30 aksi wajib POST |
+
+### Catatan Perbaikan v3.5
+
+Gejala yang dilaporkan: pengaturan tidak bisa disimpan per tab, disertai galat
+peramban `An invalid form control with name='nama_usaha' is not focusable.`
+
+Penyebabnya ada dua, dan keduanya berada di view
+`app/views/pengaturan/index.php`, bukan di controller maupun di CSS.
+
+**Pertama, kolom wajib berada di panel tersembunyi.** `nama_usaha` memakai
+atribut `required` dan berada di panel Umum. Kelima panel diletakkan di dalam
+satu `<form>` dan hanya disembunyikan dengan `hidden` plus gaya sebaris
+`display:none`. Saat halaman dibuka lewat `?tab=struk` (atau tab lain), panel
+Umum tidak tampil, tetapi kolomnya tetap ada di dalam formulir. Browser
+menjalankan validasi, tidak dapat memfokuskan kontrol yang tidak terlihat,
+lalu membatalkan pengiriman dan menampilkan galat di atas. Formulir tidak pernah
+terkirim, sehingga tidak ada tab yang bisa menyimpan.
+
+**Kedua, view bertentangan dengan desain controller.**
+`PengaturanController::simpan()` hanya menulis kunci yang benar-benar ada di
+`$_POST`, dengan komentar tegas: *"Form Pengaturan hanya mengirim field tab yang
+sedang aktif"*. View lama melanggar itu — kolom dari empat panel tersembunyi
+tetap ikut terkirim setiap kali satu tab disimpan. Kebetulan tidak merusak
+data karena panel tersembunyi berisi nilai lama, tetapi artinya: satu klik
+menulis ulang seluruh tabel pengaturan.
+
+Yang diperbaiki:
+
+- Lima grup panel dibungkus masing-masing satu pasang `if ($tabAktif === ...)`.
+  Hanya panel tab aktif yang dirender; empat panel lainnya tidak dihasilkan
+  sama sekali.
+- Atribut `hidden` dan gaya sebaris `display:none` pada delapan pembuka panel dibuang.
+- Formulir, input `tab` tersembunyi, dan blok tombol aksi tetap satu form.
+  Tidak ada perubahan pada rute maupun controller.
+- Aturan `.tab-panel[hidden]` di `asset/style.css` dibiarkan apa adanya; ia
+  tidak lagi terpakai tetapi tidak merusak apa pun.
+
+Berkas naik dari 413 menjadi 433 baris, dan ukuran halaman turun drastis karena
+empat panel tidak lagi ikut dikirim: tab Umum 46,9 KB menjadi 34,5 KB, tab
+Keamanan menjadi 29,4 KB.
+
+Dampaknya ke bagian lain: tidak ada. Kunci yang tidak dikirim tidak ditulis
+controller, jadi logika "hanya tab aktif yang tersimpan" sekarang benar-benar
+berlaku. Kolom wajib `nama_usaha` tetap `required`, tetapi hanya ada di tab
+Umum; pada tab lain kolom itu tidak lagi ada di formulir sama sekali, sehingga
+tidak pernah menggagalkan validasi.
+
+### Cara Membaca Fail HTML
+
+Bila sebuah halaman terlihat janggal, langkah pertama adalah membaca struktur
+HTML-nya, bukan menebak aturan CSS. Urutan penutup tag adalah bukti langsung;
+hasil pindai piksel sering kontradiktif karena tidak bisa membedakan tinggi
+yang benar dari tinggi yang salah.
+
+Tiga pola yang langsung berarti ada kesalahan struktur:
+
+- Runutan lebih dari tiga tag penutup yang sama berturut-turut.
+- Elemen yang harus berada di dalam sebuah wadah tetapi tercetak setelah penutup wadah itu.
+- Jumlah baris berkas berubah jauh tanpa disengaja setelah penyuntingan otomatis.
+
+## Pengujian
+
+Pengujian memakai skrip yang membuka halaman sungguhan lewat permintaan HTTP,
+bukan sekadar membaca berkas sumber. Hasil terakhir:
+
+| Skrip | Cakupan | Hasil |
+|---|---|---|
+| `uji-lokal.php` | Seluruh alur aplikasi per peran: login, transaksi, pembayaran, akun, pengaturan, log, aset, pembersihan data uji | lulus 220, gagal 0 |
+| `cek-drawer.php` | Bentuk JSON `data-kosong`, kecocokan kunci JSON dengan field formulir, pemicu panel, dan kemunculan `data-grup-edit` di mode ubah | lulus 54, gagal 0 |
+| `cek-menu.php` | Menu sidebar tiap peran dibandingkan butir per butir dengan matriks `HAK_AKSES`; jumlah section; tidak adanya section kosong | lulus 36, gagal 0 |
+| `uji-logo-galat.php` | Lima jalur gagal unggah logo: melebihi batas, tidak terkirim, unggah gagal, bukan gambar, format tidak didukung | lulus 12, gagal 0 |
+| `uji-tab.php` | Isi kelima tab Pengaturan: urutan struktur `form`, aksi, tutup form, tutup `main`, `app.js`; kolom tiap tab lengkap; kolom tab lain tidak ikut terkirim; tidak ada panel `display:none` | 5 tab, gagal 0 |
+| `uji-simpan-tab.php` | Simpan per tab lewat HTTP sungguhan: tab struk tidak lagi ditolak, tiap tab hanya mengubah kuncinya sendiri, tab lain tetap utuh | lulus 14, gagal 0 |
+| `uji-simpan-notif.php` | Centang dan lepas `notif_suara` tersimpan `"1"` / `"0"`, `notif_volume` tersimpan, tab lain tidak ikut berubah | lulus 13, gagal 0 |
+| `cek-rute.ps1` | Rute pada `menuSidebar()` diperiksa terhadap daftar rute yang sah | 13 rute menu, 0 tak terdaftar |
+| `live-struktur.ps1` | Lima tab Pengaturan di server sungguhan (`laundryku.kesug.com`), hanya dibaca tanpa menulis apa pun: form menuju `pengaturan/simpan`, urutan `form` < tombol aksi < `</form>` < `</main>` < `app.js`, tidak ada panel tersembunyi di dalam form, tiap tab hanya punya kolomnya sendiri, kolom `required` hanya di tab Umum, tab aktif ditandai di bilah tab, `_csrf` ada, `?tab=` kosong dan `?tab=` tak dikenal jatuh ke Umum | lulus 53, gagal 0 |
+| `live-akhir.ps1` | Simpan nyata di server sungguhan: tiap tab mengirim POST dan mendapat 302, nilainya tersimpan, tab lain tidak ikut tertimpa, lalu potret awal dipulihkan | 5 tab simpan, 5 tab baca, 6 pemeriksaan tab lain, 5 potret identik, gagal 0 |
+
+Kedua skrip `live-*.ps1` menyentuh database produksi, jadi keduanya memotret
+nilai pengaturan sebelum pengujian lalu memulihkannya di akhir. Pemulihan
+diperiksa ulang dengan membandingkan potret akhir terhadap potret awal, bukan
+dengan mengasumsikan nilai kembalian.
+
+Pengujian utama dijalankan dua kali berturut-turut dan hasilnya identik. Tidak
+ada entri baru di `storage/logs/laundryku-YYYY-MM-DD.log` selama pengujian
+terakhir, artinya tidak ada galat PHP, peringatan, maupun exception yang lolos
+ke log aplikasi.
+
+Aturan main: setiap skrip membersihkan jejaknya sendiri, termasuk akun
+sementara yang dibuatnya; tidak ada skrip yang menulis ke berkas produksi;
+dan pemeriksaan yang tidak bisa dijalankan ditulis apa adanya sebagai belum
+terverifikasi, bukan dianggap lulus.
+
+## Dokumen
+
+| Berkas | Isi |
+|---|---|
+| `doc.docx` | Dokumentasi produk lengkap: fitur, instalasi, konfigurasi, multi-user, alur kerja, skema database, keamanan, pengujian, deploy, dan roadmap |
+| `README.md` | Berkas ini: ringkasan teknis yang bisa dibaca langsung |
+
+Dokumen perencanaan multi-user yang dulu berdiri sendiri sebagai
+`RENCANA-MULTIUSER.md` sudah seluruhnya masuk ke dalam `doc.docx`: latar
+belakang dan tujuan di bab 4, matriks hak akses di bab 3 dan 4, alur kerja di
+bab 5, struktur database di bab 6, strategi pengujian di bab 9, serta deploy dan
+roadmap di bab 11 dan 12. Berkas `.md` itu karena itu tidak lagi perlu
+disertakan.
+
+> Sebagian dari isi dokumen ini disusun dari kode yang benar-benar di-deploy,
+> lalu diverifikasi ulang lewat pengujian otomatis dan pemeriksaan manual.
+>
+> **Dokumen acuan untuk dijual ke klien adalah `doc.docx`.**

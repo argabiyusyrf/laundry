@@ -1,0 +1,23 @@
+# Berkas yang tidak boleh ikut ter-commit ke git.
+#
+# Catatan: laundry.zip, doc.docx, dan README.md SENGAJA ikut dilacak, karena
+# ketiganya memang bagian dari hasil kerja yang diserahkan ke klien.
+
+# Log aplikasi. Isinya memuat jalur folder mesin lokal dan pesan galat
+# sementara, tidak berguna untuk riwayat versi.
+/storage/logs/*.log
+
+# Kunci berkas sementara dari Microsoft Word.
+/~$*
+/~$*.docx
+
+# Cadangan hasil suntingan berkas.
+/*.bak
+*.bak.old
+*.orig
+
+# Berkas unggahan logo hasil pengujian.
+/asset/logo/*
+
+# Berkas khusus git yang tidak boleh ikut diunggah ke server.
+/.gitattributes

@@ -3,7 +3,7 @@ include __DIR__ . '/../partials/header.php';
 $tabAktif = $tab ?? 'umum';
 ?>
 
-<div class="tabs">
+<nav class="tabs" aria-label="Bagian pengaturan">
   <a class="tab<?= $tabAktif === 'umum' ? ' active' : '' ?>" href="<?= url('pengaturan') ?>">
     <?= icon('toko', 15) ?> Umum &amp; Kontak
   </a>
@@ -19,13 +19,15 @@ $tabAktif = $tab ?? 'umum';
   <a class="tab<?= $tabAktif === 'notifikasi' ? ' active' : '' ?>" href="<?= url('pengaturan', ['tab' => 'notifikasi']) ?>">
     <?= icon('lonceng', 15) ?> Notifikasi &amp; Suara
   </a>
-</div>
+</nav>
 
 <form method="post" action="<?= url('pengaturan/simpan') ?>" enctype="multipart/form-data">
 <input type="hidden" name="tab" value="<?= e($tabAktif) ?>">
 
+<?php if ($tabAktif === 'umum'): ?>
+
 <!-- ==================== TAB: UMUM & KONTAK ==================== -->
-<div class="card tab-panel"<?= $tabAktif !== 'umum' ? ' hidden' : '' ?>>
+<div class="card tab-panel">
   <div class="card-head">
     <h2><?= icon('toko', 17) ?> Identitas &amp; Kontak Toko</h2>
   </div>
@@ -104,14 +106,16 @@ $tabAktif = $tab ?? 'umum';
 </div>
 
 <!-- Logo -->
-<div class="card tab-panel"<?= $tabAktif !== 'umum' ? ' hidden' : '' ?>>
+<div class="card tab-panel">
   <div class="card-head">
     <h2><?= icon('logo', 17) ?> Logo Toko</h2>
   </div>
 
   <div class="form-group">
     <div class="logo-upload">
-      <div class="logo-upload-prev">
+      <!-- id="logoPreview" dipakai app.js untuk menampilkan pratinjau berkas
+           yang baru dipilih, sehingga terlihat hasilnya sebelum disimpan. -->
+      <div class="logo-upload-prev" id="logoPreview">
         <?php if ($s['logo']): ?>
           <img src="<?= e($logoUrl) ?>" alt="Logo toko">
         <?php else: ?>
@@ -125,27 +129,30 @@ $tabAktif = $tab ?? 'umum';
           </label>
           <input type="file" id="logo" name="logo" accept="image/png,image/jpeg,image/webp,image/gif" style="display:none">
           <?php if ($s['logo']): ?>
-            <!-- Tombol hapus memakai form POST yang sama (bukan tautan GET), supaya
-                 tidak bisa dipicu hanya dengan <img src="..."> dari situs lain. -->
+            <!-- Hanya ada satu kendali hapus, yaitu tombol di bawah.
+                 Sebelumnya ada tombol sekaligus checkbox dengan nama
+                 hapus_logo yang sama persis, sehingga tidak jelas mana yang
+                 berlaku dan permintaan hapus bisa terkirim ganda. -->
             <button type="submit" name="hapus_logo" value="1" class="btn btn-small btn-danger"
                     onclick="return confirm('Hapus logo toko ini dan simpan pengaturan?')">
-              <?= icon('hapus', 13) ?> Hapus &amp; Simpan
+              <?= icon('hapus', 13) ?> Hapus Logo
             </button>
           <?php endif; ?>
         </div>
-        <p class="field-hint">PNG, JPG, WebP, atau GIF. Maksimal 1 MB. Logo tampil di bagian atas struk. Tombol Hapus berlaku saat pengaturan disimpan.</p>
+        <!-- id="logoInfo" diisi app.js dengan nama berkas, ukuran, dan
+             peringatan bila ukuran melewati batas 1 MB. -->
+        <p class="field-hint" id="logoInfo">PNG, JPG, WebP, atau GIF. Maksimal 1 MB. Logo tampil di bagian atas struk.</p>
       </div>
     </div>
-    <?php if ($s['logo']): ?>
-      <label class="field-check">
-        <input type="checkbox" name="hapus_logo" value="1"> Hapus logo saat menyimpan pengaturan ini
-      </label>
-    <?php endif; ?>
   </div>
 </div>
 
+<?php endif; ?>
+
+<?php if ($tabAktif === 'struk'): ?>
+
 <!-- ==================== TAB: STRUK & NOTA ==================== -->
-<div class="card tab-panel"<?= $tabAktif !== 'struk' ? ' hidden' : '' ?>>
+<div class="card tab-panel">
   <div class="card-head">
     <h2><?= icon('struk', 17) ?> Isi Struk &amp; Nomor Nota</h2>
   </div>
@@ -200,7 +207,7 @@ $tabAktif = $tab ?? 'umum';
   </div>
 </div>
 
-<div class="card tab-panel"<?= $tabAktif !== 'struk' ? ' hidden' : '' ?>>
+<div class="card tab-panel">
   <div class="card-head">
     <h2><?= icon('printer', 17) ?> Pratinjau Struk</h2>
     <span class="card-note">Tampilan sesuai pengaturan saat ini</span>
@@ -256,8 +263,12 @@ $tabAktif = $tab ?? 'umum';
   </div>
 </div>
 
+<?php endif; ?>
+
+<?php if ($tabAktif === 'keuangan'): ?>
+
 <!-- ==================== TAB: KEUANGAN ==================== -->
-<div class="card tab-panel"<?= $tabAktif !== 'keuangan' ? ' hidden' : '' ?>>
+<div class="card tab-panel">
   <div class="card-head">
     <h2><?= icon('diskon', 17) ?> Pajak, Diskon &amp; Uang Muka</h2>
   </div>
@@ -293,7 +304,7 @@ $tabAktif = $tab ?? 'umum';
   </div>
 </div>
 
-<div class="card tab-panel"<?= $tabAktif !== 'keuangan' ? ' hidden' : '' ?>>
+<div class="card tab-panel">
   <div class="card-head">
     <h2><?= icon('koin', 17) ?> Satuan &amp; Mata Uang</h2>
   </div>
@@ -320,9 +331,13 @@ $tabAktif = $tab ?? 'umum';
   </div>
 </div>
 
+<?php endif; ?>
+
+<?php if ($tabAktif === 'keamanan'): ?>
+
 <!-- ==================== TAB: KEAMANAN ==================== -->
 <?php $bolehKeamanan = cekHak('pengaturan_keamanan'); ?>
-<div class="card tab-panel"<?= $tabAktif !== 'keamanan' ? ' hidden' : '' ?>>
+<div class="card tab-panel">
   <div class="card-head">
     <h2><?= icon('keamanan', 17) ?> Keamanan Akun</h2>
   </div>
@@ -368,8 +383,12 @@ $tabAktif = $tab ?? 'umum';
   </div>
 </div>
 
+<?php endif; ?>
+
+<?php if ($tabAktif === 'notifikasi'): ?>
+
 <!-- ==================== TAB: NOTIFIKASI & SUARA ==================== -->
-<div class="card tab-panel"<?= $tabAktif !== 'notifikasi' ? ' hidden' : '' ?>>
+<div class="card tab-panel">
   <div class="card-head">
     <h2><?= icon('lonceng', 17) ?> Notifikasi &amp; Suara</h2>
   </div>
@@ -402,6 +421,8 @@ $tabAktif = $tab ?? 'umum';
     <span class="hint">Uji bunyi notifikasi dengan volume di atas.</span>
   </div>
 </div>
+
+<?php endif; ?>
 
 <div class="actions no-print">
   <a href="<?= url('dashboard') ?>" class="btn btn-outline"><?= icon('kembali', 15) ?> Batal</a>

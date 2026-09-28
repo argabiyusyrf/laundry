@@ -139,23 +139,41 @@ class PengaturanController extends Controller
             $payload['logo'] = '';
         }
 
-        // Upload logo baru
-        $file = $_FILES['logo'] ?? null;
-        if ($file && is_array($file) && ($file['error'] ?? UPLOAD_ERR_NO_FILE) === UPLOAD_ERR_OK && $file['size'] > 0) {
-            $nama = $this->simpanBerkasLogo($file);
-            if ($nama === null) {
-                // Berkas tidak valid: tetap simpan teks lain, beri peringatan
-                $model->simpan($payload);
-                setFlash('error', 'Pengaturan lain disimpan, tetapi logo tidak diunggah: gunakan PNG/JPG/WebP/GIF maksimal 1 MB.');
-                $this->redirect('pengaturan');
+        // Unggah logo baru.
+        //
+        // Setiap kegagalan di blok ini SELALU disertai pesan yang menyebut
+        // sebabnya. Sebelumnya, bila $_FILES kosong atau error-nya bukan
+        // UPLOAD_ERR_OK, seluruh blok dilewati tanpa pesan apa pun sehingga
+        // pengguna hanya melihat "Pengaturan berhasil disimpan" padahal
+        // logonya tidak pernah tersimpan sama sekali.
+        $alasanGagal = null;
+        $file        = $_FILES['logo'] ?? null;
+
+        if (is_array($file)) {
+            $kodeGalat = (int)($file['error'] ?? UPLOAD_ERR_NO_FILE);
+            if ($kodeGalat === UPLOAD_ERR_OK && (int)($file['size'] ?? 0) > 0) {
+                $nama = $this->simpanBerkasLogo($file);
+                if ($nama === null) {
+                    // Berkas ditolak: simpan teks lain, beri tahu sebabnya.
+                    $alasanGagal = $this->alasanLogoDitolak($file);
+                } else {
+                    $this->hapusBerkasLogo($model->nilai('logo'));
+                    $payload['logo'] = $nama;
+                }
+            } elseif ($kodeGalat !== UPLOAD_ERR_NO_FILE) {
+                // Galat bawaan PHP, mis. berkas melebihi upload_max_filesize.
+                $alasanGagal = $this->alasanGalatUnggah($kodeGalat);
             }
-            $this->hapusBerkasLogo($model->nilai('logo'));
-            $payload['logo'] = $nama;
         }
 
         $model->simpan($payload);
 
-        setFlash('success', 'Pengaturan berhasil disimpan.');
+        if ($alasanGagal !== null) {
+            setFlash('error', 'Pengaturan lain disimpan, tetapi logo gagal diunggah. ' . $alasanGagal);
+            logAktivitas('pengaturan_logo', 'Unggah logo gagal: ' . $alasanGagal);
+        } else {
+            setFlash('success', 'Pengaturan berhasil disimpan.');
+        }
         logAktivitas('pengaturan_simpan', 'Menyimpan pengaturan usaha' .
             (!empty($_POST['hapus_logo']) ? ' + hapus logo' : ''));
 
@@ -216,6 +234,65 @@ class PengaturanController extends Controller
     }
 
     /** Hapus berkas logo lama dari disk bila ada. */
+    /**
+     * Jelaskan kenapa simpanBerkasLogo() menolak sebuah berkas.
+     *
+     * Dipanggil hanya setelah simpanBerkasLogo() mengembalikan null, jadi
+     * tujuannya mengganti satu pesan umum dengan keterangan yang bisa
+     * langsung ditindaklanjuti pengguna.
+     */
+    private function alasanLogoDitolak(array $file): string
+    {
+        $ukuran = (int)($file['size'] ?? 0);
+        if ($ukuran > self::LOGO_MAX) {
+            return sprintf(
+                'Ukuran berkas %.2f MB melewati batas 1 MB.',
+                $ukuran / 1048576
+            );
+        }
+        if (!isset($file['tmp_name']) || !is_uploaded_file($file['tmp_name'])) {
+            return 'Berkas tidak dikenali sebagai hasil unggahan yang sah.';
+        }
+        $info = @getimagesize($file['tmp_name']);
+        if ($info === false) {
+            return 'Isi berkas bukan gambar yang dapat dibaca.';
+        }
+        $mime = (string)($info['mime'] ?? '');
+        if (!isset(self::LOGO_MIME[$mime])) {
+            return sprintf(
+                'Format %s tidak didukung. Gunakan PNG, JPG, WebP, atau GIF.',
+                $mime !== '' ? $mime : 'tidak dikenal'
+            );
+        }
+        $dir = BASE_PATH . self::LOGO_DIR;
+        if (!is_dir($dir)) {
+            return sprintf('Folder penyimpanan %s tidak dapat dibuat di server.', self::LOGO_DIR);
+        }
+        return sprintf('Server tidak dapat menyimpan berkas ke folder %s.', self::LOGO_DIR);
+    }
+
+    /**
+     * Terjemahkan kode galat unggahan bawaan PHP menjadi kalimat yang
+     * bisa dibaca pengguna.
+     */
+    private function alasanGalatUnggah(int $kode): string
+    {
+        switch ($kode) {
+            case UPLOAD_ERR_INI_SIZE:
+            case UPLOAD_ERR_FORM_SIZE:
+                return 'Ukuran berkas melewati batas 1 MB.';
+            case UPLOAD_ERR_PARTIAL:
+                return 'Berkas hanya terunggah sebagian. Coba lagi dengan koneksi yang lebih stabil.';
+            case UPLOAD_ERR_NO_TMP_DIR:
+                return 'Server tidak memiliki folder berkas sementara.';
+            case UPLOAD_ERR_CANT_WRITE:
+                return 'Server gagal menulis berkas ke penyimpanan.';
+            case UPLOAD_ERR_EXTENSION:
+                return 'Unggahan dihentikan oleh ekstensi PHP pada server.';
+            default:
+                return sprintf('PHP melaporkan galat unggahan dengan kode %d.', $kode);
+        }
+    }
     private function hapusBerkasLogo(string $nama): void
     {
         if ($nama === '') {

@@ -474,4 +474,364 @@
       if (janji && janji.catch) janji.catch(function () {});
     });
   }
+
+  /* ================= Pratinjau logo (halaman Pengaturan) =================
+     Sebelumnya begitu berkas dipilih, layar tidak berubah sama sekali:
+     tidak ada nama berkas, tidak ada ukuran, tidak ada pratinjau gambarnya.
+     Akibatnya unggahan yang berhasil pun terasa tidak berfungsi.
+
+     Blok ini menampilkan ketiganya sebelum tombol Simpan ditekan, dan
+     memperingatkan bila ukuran melewati batas 1 MB. Angka batasnya sengaja
+     disamakan dengan PengaturanController::LOGO_MAX agar tidak berbeda
+     antara pemeriksaan di peramban dan di server. */
+  var inputLogo = document.getElementById('logo');
+  if (inputLogo) {
+    var kotakLogo = document.getElementById('logoPreview');
+    var infoLogo = document.getElementById('logoInfo');
+    var BATAS_LOGO = 1048576; /* 1 MB */
+
+    function ukuranTerbaca(byte) {
+      if (byte >= 1048576) { return (byte / 1048576).toFixed(2) + ' MB'; }
+      if (byte >= 1024) { return Math.round(byte / 1024) + ' KB'; }
+      return byte + ' byte';
+    }
+
+    function setInfoLogo(teks, galat) {
+      if (!infoLogo) { return; }
+      infoLogo.textContent = teks;
+      if (galat) { infoLogo.classList.add('galat'); }
+      else { infoLogo.classList.remove('galat'); }
+    }
+
+    inputLogo.addEventListener('change', function () {
+      var berkas = inputLogo.files && inputLogo.files[0];
+
+      if (!berkas) {
+        setInfoLogo('', false);
+        return;
+      }
+
+      if (berkas.size > BATAS_LOGO) {
+        setInfoLogo(berkas.name + ' - ' + ukuranTerbaca(berkas.size)
+          + ', melewati batas 1 MB. Server akan menolak berkas ini.', true);
+      } else {
+        setInfoLogo(berkas.name + ' - ' + ukuranTerbaca(berkas.size)
+          + ', siap diunggah setelah tombol Simpan ditekan.', false);
+      }
+
+      /* Tampilkan gambar yang dipilih. FileReader dipakai supaya pratinjau
+         tetap jalan di peramban yang tidak mendukung object URL. */
+      if (window.FileReader && /^image\//.test(berkas.type)) {
+        var pembaca = new FileReader();
+        pembaca.onload = function (e) {
+          if (!kotakLogo) { return; }
+          var gambar = document.createElement('img');
+          gambar.alt = 'Pratinjau logo yang dipilih';
+          gambar.src = String((e.target && e.target.result) || '');
+          kotakLogo.textContent = '';
+          kotakLogo.appendChild(gambar);
+        };
+        pembaca.readAsDataURL(berkas);
+      }
+    });
+  }
+
+  /* ================= Panel geser (drawer) =================
+     Daftar pada halaman karyawan, paket, dan pelanggan tetap halaman
+     penuh. Hanya formulir tambah dan ubah yang muncul di panel yang
+     meluncur dari kanan.
+
+     Semua pemicu memakai atribut data, bukan kelas, supaya status
+     buka-tutup hanya punya satu sumber kebenaran. Atribut yang dipakai:
+
+       data-drawer="nama"          pada elemen .drawer
+       data-drawer-buka="nama"     pada tombol/tautan pemicu
+       data-drawer-mode="tambah"   pemicu mode tambah (lainnya mode ubah)
+       data-drawer-tutup           tombol tutup; dibiarkan berjalan
+                                   sebagai tautan supaya mode ubah ikut
+                                   melepas ?edit= dari alamat
+       data-dari-edit="1"          pada <form> bila halaman dibuka dari
+                                   tautan Edit, supaya panel langsung
+                                   terbuka tanpa perlu klik lagi
+       data-kosong='{...}'         nilai isian untuk mode tambah
+       data-tambah-action="..."    alamat simpan untuk mode tambah
+       data-judul-tambah           teks judul untuk mode tambah
+       data-label-tambah           teks tombol simpan untuk mode tambah
+       data-grup-edit              bagian yang hanya tampil saat mode ubah
+  */
+  var panelAktif = null;
+  var fokusSebelum = null;
+
+  function panelUntuk(nama) {
+    return document.querySelector('[data-drawer="' + nama + '"]');
+  }
+
+  function panelTutup() {
+    if (!panelAktif) { return; }
+    panelAktif.classList.remove('tampil');
+    var lapis = document.querySelector('.drawer-overlay');
+    if (lapis) { lapis.classList.remove('tampil'); }
+    document.body.classList.remove('drawer-terbuka');
+    panelAktif = null;
+    if (fokusSebelum && document.contains(fokusSebelum)) {
+      try { fokusSebelum.focus(); } catch (e) { /* abaikan */ }
+    }
+    fokusSebelum = null;
+  }
+
+  function panelBuka(panel, pemicu) {
+    if (!panel) { return; }
+    if (panelAktif && panelAktif !== panel) {
+      panelAktif.classList.remove('tampil');
+    }
+    panelAktif = panel;
+    fokusSebelum = pemicu || null;
+
+    var lapis = document.querySelector('.drawer-overlay');
+    if (lapis) { lapis.classList.add('tampil'); }
+    document.body.classList.add('drawer-terbuka');
+    panel.classList.add('tampil');
+
+    /* Fokus langsung ke kolom isian pertama supaya papan ketik masuk
+       ke panel, bukan tetap di halaman di belakangnya. */
+    window.setTimeout(function () {
+      var kolom = panel.querySelector(
+        '.drawer-body input:not([type="hidden"]):not([disabled]),'
+        + ' .drawer-body select, .drawer-body textarea'
+      );
+      if (kolom) { kolom.focus(); }
+    }, 80);
+  }
+
+  /* Kembalikan formulir ke keadaan mode tambah: isian dikosongkan, alamat
+     simpan ditukar ke endpoint tambah, dan bagian khusus ubah disembunyikan.
+     Nilai mode tambah dibaca dari data-kosong supaya nama field tidak
+     perlu ditulis ulang di JavaScript. */
+  function panelSetModeTambah(panel) {
+    var form = panel.querySelector('form[data-kosong]');
+    if (!form) { return; }
+
+    var kosong = {};
+    try {
+      kosong = JSON.parse(form.getAttribute('data-kosong') || '{}');
+    } catch (e) {
+      kosong = {};
+    }
+
+    var isian = form.querySelectorAll('[name]');
+    for (var i = 0; i < isian.length; i++) {
+      var el = isian[i];
+      var nama = el.getAttribute('name');
+      if (!Object.prototype.hasOwnProperty.call(kosong, nama)) { continue; }
+      if (el.type === 'checkbox' || el.type === 'radio') {
+        el.checked = (kosong[nama] === true || kosong[nama] === '1' || kosong[nama] === 1);
+      } else {
+        el.value = (kosong[nama] === null || kosong[nama] === undefined)
+          ? '' : String(kosong[nama]);
+      }
+    }
+
+    if (form.getAttribute('data-tambah-action')) {
+      form.setAttribute('action', form.getAttribute('data-tambah-action'));
+    }
+    form.removeAttribute('data-dari-edit');
+
+    var grup = form.querySelector('[data-grup-edit]');
+    if (grup) { grup.hidden = true; }
+
+    var judul = panel.querySelector('[data-teks-judul]');
+    if (judul && form.getAttribute('data-judul-tambah')) {
+      judul.textContent = form.getAttribute('data-judul-tambah');
+    }
+    var ikon = panel.querySelector('[data-ikon-tambah]');
+    var ikonEdit = panel.querySelector('[data-ikon-edit]');
+    if (ikon) { ikon.hidden = false; }
+    if (ikonEdit) { ikonEdit.hidden = true; }
+
+    var kirim = panel.querySelector('[data-teks-kirim]');
+    if (kirim && form.getAttribute('data-label-tambah')) {
+      kirim.textContent = form.getAttribute('data-label-tambah');
+    }
+  }
+
+  document.addEventListener('click', function (ev) {
+    var target = ev.target;
+    if (!target || !target.closest) { return; }
+
+    var pemicu = target.closest('[data-drawer-buka]');
+    if (pemicu) {
+      var panel = panelUntuk(pemicu.getAttribute('data-drawer-buka'));
+      if (panel) {
+        /* Taipan dibiarkan mengikuti alamatnya agar mode ubah tetap
+           memuat data dari server; tombol tidak melakukan apa pun. */
+        if (pemicu.tagName !== 'A') { ev.preventDefault(); }
+        if (pemicu.getAttribute('data-drawer-mode') === 'tambah') {
+          panelSetModeTambah(panel);
+        }
+        panelBuka(panel, pemicu);
+      }
+      return;
+    }
+
+    if (target.closest('[data-drawer-tutup]')) {
+      /* Sengaja tidak dicegat: bila tombol tutup berupa tautan, halaman
+         pindah ke daftar bersih sekaligus panelnya menutup. */
+      panelTutup();
+      return;
+    }
+
+    if (target.classList && target.classList.contains('drawer-overlay')) {
+      panelTutup();
+    }
+  });
+
+  document.addEventListener('keydown', function (ev) {
+    if (ev.key === 'Escape' && panelAktif) { panelTutup(); }
+  });
+
+  /* Datang dari tautan Edit: formulir sudah terisi server, jadi panel
+     langsung dibuka tanpa pengguna perlu klik apa pun. */
+  (function () {
+    var formEdit = document.querySelector('form[data-dari-edit]');
+    if (!formEdit || !formEdit.closest) { return; }
+    var panel = formEdit.closest('[data-drawer]');
+    if (panel) { panelBuka(panel, null); }
+  })();
+
+  /* ================= Halaman Profil Saya =================
+     Dua hal yang sebelumnya tidak ada sama sekali:
+     1. Tombol lihat/sembunyikan password pada ketiga kolom password.
+     2. Penilaian kekuatan password di peramban, berikut daftar periksa.
+
+     Panjang minimum diambil dari atribut data-min-pw yang ditulis server,
+     bukan ditulis ulang di sini, sehingga angka di layar sama dengan yang
+     dipakai server saat menyimpan password baru. */
+
+  var minPw = 0;
+  var formPw = document.querySelector('[data-form-password]');
+  if (formPw) {
+    minPw = parseInt(formPw.getAttribute('data-min-pw') || '0', 10) || 0;
+
+    /* --- Tombol lihat/sembunyikan --- */
+    var tombolPw = document.querySelectorAll('[data-pw-toggle]');
+    for (var t = 0; t < tombolPw.length; t++) {
+      tombolPw[t].addEventListener('click', function () {
+        var kolom = document.getElementById(this.getAttribute('data-pw-toggle'));
+        if (!kolom) { return; }
+        var tampil = kolom.type === 'password';
+        kolom.type = tampil ? 'text' : 'password';
+        this.setAttribute('aria-pressed', tampil ? 'true' : 'false');
+        this.setAttribute('aria-label', (tampil ? 'Sembunyikan' : 'Tampilkan')
+          + ' ' + (kolom.getAttribute('data-nama-kolom') || 'password'));
+        this.setAttribute('title', tampil ? 'Sembunyikan' : 'Tampilkan');
+        kolom.focus();
+      });
+    }
+
+    /* --- Penilaian kekuatan --- */
+    var kolomBaru = document.getElementById('password_baru');
+    var kolomUlang = document.getElementById('password_baru_ulang');
+    var meter = document.querySelector('.pw-meter');
+    var keterangan = document.querySelector('.pw-kuat b');
+    var sisa = document.querySelector('[data-pw-sisa]');
+    var daftarSyarat = document.querySelector('[data-pw-syarat]');
+    var catatanCocok = document.querySelector('[data-pw-cocok]');
+    var labelTingkat = ['', 'lemah', 'cukup', 'baik', 'kuat'];
+
+    function nilaiSyarat(nilai) {
+      return {
+        panjang: minPw > 0 && nilai.length >= minPw,
+        kecil: /[a-z]/.test(nilai),
+        besar: /[A-Z]/.test(nilai),
+        angka: /[0-9]/.test(nilai),
+        simbol: /[^A-Za-z0-9]/.test(nilai)
+      };
+    }
+
+    function perbaruiKekuatan() {
+      if (!kolomBaru) { return; }
+      var nilai = kolomBaru.value;
+      var hasil = nilaiSyarat(nilai);
+
+      /* Daftar periksa: tanda filled hanya kalau ada isian sama sekali,
+         supaya halaman tidak langsung dipenuhi tanda centang saat dibuka. */
+      if (daftarSyarat) {
+        var butir = daftarSyarat.querySelectorAll('li');
+        for (var i = 0; i < butir.length; i++) {
+          var kunci = butir[i].getAttribute('data-syarat');
+          var kena = nilai.length > 0 && hasil[kunci] === true;
+          if (kena) { butir[i].classList.add('oke'); }
+          else { butir[i].classList.remove('oke'); }
+        }
+      }
+
+      /* Tingkat 1 sampai 4. Syarat panjang memberi nilai paling besar
+         karena itu satu-satunya yang benar-benar diperiksa server. */
+      var tingkat = 0;
+      if (nilai.length > 0) {
+        tingkat = hasil.panjang ? 2 : 1;
+        if (hasil.kecil) { tingkat += 1; }
+        if (hasil.besar) { tingkat += 1; }
+        if (hasil.angka) { tingkat += 1; }
+        if (hasil.simbol) { tingkat += 1; }
+        if (tingkat > 4) { tingkat = 4; }
+        if (tingkat < 1) { tingkat = 1; }
+      }
+
+      if (meter) { meter.setAttribute('data-level', String(tingkat)); }
+      if (keterangan && keterangan.parentNode) {
+        keterangan.parentNode.setAttribute('data-level', String(tingkat));
+        keterangan.textContent = 'Kekuatan: ' + (tingkat === 0 ? 'belum dinilai' : labelTingkat[tingkat]);
+      }
+      if (sisa) {
+        if (tingkat === 0) {
+          sisa.textContent = ' Isi password baru untuk melihat penilaiannya.';
+        } else if (!hasil.panjang) {
+          sisa.textContent = ' Kurang ' + (minPw - nilai.length) + ' karakter lagi.';
+        } else {
+          sisa.textContent = ' Panjang sudah cukup.';
+        }
+      }
+      perbaruiCocok();
+    }
+
+    function perbaruiCocok() {
+      if (!kolomBaru || !kolomUlang || !catatanCocok) { return; }
+      var sama = kolomUlang.value.length > 0 && kolomUlang.value === kolomBaru.value;
+      catatanCocok.hidden = !sama;
+    }
+
+    if (kolomBaru) { kolomBaru.addEventListener('input', perbaruiKekuatan); }
+    if (kolomUlang) { kolomUlang.addEventListener('input', perbaruiCocok); }
+    perbaruiKekuatan();
+  }
+
+  /* Catatan pada formulir data akun: memberi tahu apakah isian sudah
+     berubah dari nilai sewaktu halaman dimuat, supaya menekan Simpan
+     tanpa perubahan tidak terasa seperti tombol yang tidak berguna. */
+  var formProfil = document.querySelector('[data-form-profil]');
+  if (formProfil) {
+    var catatan = formProfil.querySelector('[data-catatan-profil]');
+    var awal = [];
+    var kolomProfil = formProfil.querySelectorAll('input[name]');
+    for (var p = 0; p < kolomProfil.length; p++) {
+      awal.push([kolomProfil[p], kolomProfil[p].value]);
+    }
+    if (catatan) {
+      var cekPerubahan = function () {
+        for (var q = 0; q < awal.length; q++) {
+          if (awal[q][0].value !== awal[q][1]) {
+            catatan.textContent = 'Ada perubahan yang belum disimpan.';
+            catatan.setAttribute('data-dirty', '1');
+            return;
+          }
+        }
+        catatan.textContent = 'Belum ada perubahan pada isian di atas.';
+        catatan.removeAttribute('data-dirty');
+      };
+      for (var r = 0; r < kolomProfil.length; r++) {
+        kolomProfil[r].addEventListener('input', cekPerubahan);
+      }
+    }
+  }
 })();

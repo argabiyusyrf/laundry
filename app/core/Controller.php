@@ -110,10 +110,21 @@ abstract class Controller
                 $this->redirect('login');
             }
         }
+
         /* Anti-CSRF: setiap POST dari pengguna yang sudah login wajib membawa
            token formulir yang cocok dengan sesinya. Tanpa ini, situs lain bisa
            mengirim formulir atas nama pengguna yang sedang login. */
         if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST' && !csrfValid()) {
+            /* PHP membuang seluruh isi $_POST maupun $_FILES begitu total
+               data POST melewati post_max_size. Akibatnya token _csrf ikut
+               hilang dan pemeriksaan di atas gagal, padahal penyebabnya bukan
+               token kedaluwarsa melainkan unggahan yang terlalu besar. Bedakan
+               keduanya lebih dulu supaya pesan yang tampil benar. */
+            if (self::kirimanMelebihiBatas()) {
+                tampilkanError(413, 'Ukuran data yang dikirim melebihi batas server '
+                    . '(' . self::batasPost() . '). '
+                    . 'Kurangi ukuran berkas yang diunggah, lalu ulangi.');
+            }
             /* Lihat catatan di wajibPost(): 419 diubah Apache menjadi 500. */
             tampilkanError(403, 'Token keamanan formulir tidak valid atau sudah kedaluwarsa. '
                 . 'Muat ulang halaman lalu ulangi aksinya.');
@@ -122,6 +133,42 @@ abstract class Controller
         $_SESSION['last_activity'] = time();
     }
 
+    /** Batas post_max_size server dalam bentuk yang enak dibaca manusia. */
+    private static function batasPost(): string
+    {
+        $batas = trim((string)ini_get('post_max_size'));
+        if ($batas === '') {
+            return 'post_max_size';
+        }
+        $angka = (int)$batas;
+        $satuan = strtoupper(substr($batas, -1));
+        if ($satuan === 'G') {
+            return round($angka / 1024, 2) . ' GB';
+        }
+        if ($satuan === 'M') {
+            return $angka . ' MB';
+        }
+        if ($satuan === 'K') {
+            return round($angka / 1024, 2) . ' MB';
+        }
+        return $batas . ' byte';
+    }
+
+    /**
+     * Deteksi kiriman yang melebihi post_max_size.
+     *
+     * Ciri khasnya: permintaan POST yang punya Content-Length, tetapi $_POST
+     * dan $_FILES sama sekali kosong. PHP sudah membuang isinya sebelum
+     * skrip berjalan, sehingga tidak ada satu pun token yang bisa diperiksa.
+     */
+    private static function kirimanMelebihiBatas(): bool
+    {
+        if (!empty($_POST) || !empty($_FILES)) {
+            return false;
+        }
+        $panjang = (int)($_SERVER['CONTENT_LENGTH'] ?? 0);
+        return $panjang > 0;
+    }
     /** Data user yang sedang login. */
     protected function currentUser(): array
     {
