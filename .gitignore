@@ -21,3 +21,4 @@
 
 # Berkas khusus git yang tidak boleh ikut diunggah ke server.
 /.gitattributes
+RENCANA-MULTIUSER.md
